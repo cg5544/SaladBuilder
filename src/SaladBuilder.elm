@@ -97,14 +97,19 @@ dressingToString dressing =
             "Oil and Vinegar"
 
 
+type alias Salad =
+    { base : Base
+    , toppings : Set String
+    , dressing : Dressing
+    }
+
+
 type alias Model =
     { building : Bool
     , sending : Bool
     , success : Bool
     , error : Maybe String
-    , base : Base
-    , toppings : Set String
-    , dressing : Dressing
+    , salad : Salad
     , name : String
     , email : String
     , phone : String
@@ -117,9 +122,11 @@ initialModel =
     , sending = False
     , success = False
     , error = Nothing
-    , base = Lettuce
-    , toppings = Set.empty
-    , dressing = NoDressing
+    , salad =
+        { base = Lettuce
+        , toppings = Set.empty
+        , dressing = NoDressing
+        }
     , name = ""
     , email = ""
     , phone = ""
@@ -435,11 +442,37 @@ view model =
 ---- UPDATE ----
 
 
-type Msg
+type SaladMsg
     = SetBase Base
     | ToggleTopping Topping Bool
     | SetDressing Dressing
-    | SetName String
+
+
+updateSalad : SaladMsg -> Salad -> Salad
+updateSalad msg salad =
+    case msg of
+        SetBase base ->
+            { salad | base = base }
+
+        ToggleTopping topping add ->
+            let
+                updater =
+                    if add then
+                        Set.insert
+
+                    else
+                        Set.remove
+            in
+            { salad
+                | toppings = updater (toppingToString topping) salad.toppings
+            }
+
+        SetDressing dressing ->
+            { salad | dressing = dressing }
+
+
+type Msg
+    = SetName String
     | SetEmail String
     | SetPhone String
     | Send
@@ -475,37 +508,6 @@ send model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        -- START:update.SetBase
-        SetBase base ->
-            ( { model | base = base }
-            , Cmd.none
-            )
-
-        -- END:update.SetBase
-        -- START:update.ToggleTopping
-        ToggleTopping topping add ->
-            let
-                updater =
-                    if add then
-                        Set.insert
-
-                    else
-                        Set.remove
-            in
-            ( { model
-                | toppings = updater (toppingToString topping) model.toppings
-              }
-            , Cmd.none
-            )
-
-        -- END:update.ToggleTopping
-        -- START:update.SetDressing
-        SetDressing dressing ->
-            ( { model | dressing = dressing }
-            , Cmd.none
-            )
-
-        -- END:update.SetDressing
         SetName name ->
             ( { model | name = name }
             , Cmd.none
