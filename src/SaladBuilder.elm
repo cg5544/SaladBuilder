@@ -219,12 +219,8 @@ viewBuild model =
                 [ input
                     [ type_ "radio"
                     , name "base"
-                    , checked (model.base == Lettuce)
-
-                    -- START:viewBuild.set.lettuce
-                    , onClick (SetBase Lettuce)
-
-                    -- END:viewBuild.set.lettuce
+                    , checked (model.salad.base == Lettuce)
+                    , onClick (SaladMsg (SetBase Lettuce))
                     ]
                     []
                 , text "Lettuce"
@@ -233,8 +229,8 @@ viewBuild model =
                 [ input
                     [ type_ "radio"
                     , name "base"
-                    , checked (model.base == Spinach)
-                    , onClick (SetBase Spinach)
+                    , checked (model.salad.base == Spinach)
+                    , onClick (SaladMsg (SetBase Spinach))
                     ]
                     []
                 , text "Spinach"
@@ -243,8 +239,8 @@ viewBuild model =
                 [ input
                     [ type_ "radio"
                     , name "base"
-                    , checked (model.base == SpringMix)
-                    , onClick (SetBase SpringMix)
+                    , checked (model.salad.base == SpringMix)
+                    , onClick (SaladMsg (SetBase SpringMix))
                     ]
                     []
                 , text "Spring Mix"
@@ -255,12 +251,8 @@ viewBuild model =
             , label [ class "select-option" ]
                 [ input
                     [ type_ "checkbox"
-                    , checked (Set.member (toppingToString Tomatoes) model.toppings)
-
-                    -- START:viewBuild.toggle.tomatoes
-                    , onCheck (ToggleTopping Tomatoes)
-
-                    -- END:viewBuild.toggle.tomatoes
+                    , checked (Set.member (toppingToString Tomatoes) model.salad.toppings)
+                    , onCheck (SaladMsg << ToggleTopping Tomatoes)
                     ]
                     []
                 , text "Tomatoes"
@@ -268,8 +260,8 @@ viewBuild model =
             , label [ class "select-option" ]
                 [ input
                     [ type_ "checkbox"
-                    , checked (Set.member (toppingToString Cucumbers) model.toppings)
-                    , onCheck (ToggleTopping Cucumbers)
+                    , checked (Set.member (toppingToString Cucumbers) model.salad.toppings)
+                    , onCheck (SaladMsg << ToggleTopping Cucumbers)
                     ]
                     []
                 , text "Cucumbers"
@@ -277,8 +269,8 @@ viewBuild model =
             , label [ class "select-option" ]
                 [ input
                     [ type_ "checkbox"
-                    , checked (Set.member (toppingToString Onions) model.toppings)
-                    , onCheck (ToggleTopping Onions)
+                    , checked (Set.member (toppingToString Onions) model.salad.toppings)
+                    , onCheck (SaladMsg << ToggleTopping Onions)
                     ]
                     []
                 , text "Onions"
@@ -290,12 +282,8 @@ viewBuild model =
                 [ input
                     [ type_ "radio"
                     , name "dressing"
-                    , checked (model.dressing == NoDressing)
-
-                    -- START:viewBuild.set.no.dressing
-                    , onClick (SetDressing NoDressing)
-
-                    -- END:viewBuild.set.no.dressing
+                    , checked (model.salad.dressing == NoDressing)
+                    , onClick (SaladMsg (SetDressing NoDressing))
                     ]
                     []
                 , text "None"
@@ -304,8 +292,8 @@ viewBuild model =
                 [ input
                     [ type_ "radio"
                     , name "dressing"
-                    , checked (model.dressing == Italian)
-                    , onClick (SetDressing Italian)
+                    , checked (model.salad.dressing == Italian)
+                    , onClick (SaladMsg (SetDressing Italian))
                     ]
                     []
                 , text "Italian"
@@ -314,8 +302,8 @@ viewBuild model =
                 [ input
                     [ type_ "radio"
                     , name "dressing"
-                    , checked (model.dressing == RaspberryVinaigrette)
-                    , onClick (SetDressing RaspberryVinaigrette)
+                    , checked (model.salad.dressing == RaspberryVinaigrette)
+                    , onClick (SaladMsg (SetDressing RaspberryVinaigrette))
                     ]
                     []
                 , text "Raspberry Vinaigrette"
@@ -324,8 +312,8 @@ viewBuild model =
                 [ input
                     [ type_ "radio"
                     , name "dressing"
-                    , checked (model.dressing == OilVinegar)
-                    , onClick (SetDressing OilVinegar)
+                    , checked (model.salad.dressing == OilVinegar)
+                    , onClick (SaladMsg (SetDressing OilVinegar))
                     ]
                     []
                 , text "Oil and Vinegar"
@@ -384,13 +372,13 @@ viewConfirmation model =
         , table []
             [ tr []
                 [ th [] [ text "Base:" ]
-                , td [] [ text (baseToString model.base) ]
+                , td [] [ text (baseToString model.salad.base) ]
                 ]
             , tr []
                 [ th [] [ text "Toppings:" ]
                 , td []
                     [ ul []
-                        (model.toppings
+                        (model.salad.toppings
                             |> Set.toList
                             |> List.map (\topping -> li [] [ text topping ])
                         )
@@ -398,7 +386,7 @@ viewConfirmation model =
                 ]
             , tr []
                 [ th [] [ text "Dressing:" ]
-                , td [] [ text (dressingToString model.dressing) ]
+                , td [] [ text (dressingToString model.salad.dressing) ]
                 ]
             , tr []
                 [ th [] [ text "Name:" ]
@@ -472,7 +460,8 @@ updateSalad msg salad =
 
 
 type Msg
-    = SetName String
+    = SaladMsg SaladMsg
+    | SetName String
     | SetEmail String
     | SetPhone String
     | Send
@@ -508,6 +497,11 @@ send model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        SaladMsg saladMsg ->
+            ( { model | salad = updateSalad saladMsg model.salad }
+            , Cmd.none
+            )
+
         SetName name ->
             ( { model | name = name }
             , Cmd.none
